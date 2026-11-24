@@ -1,0 +1,33 @@
+name: Compilar para Appetize
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Compilar app para simulador
+        run: |
+          xcodebuild -project FerreteraCD.xcodeproj \
+            -target FerreteraCD \
+            -sdk iphonesimulator \
+            -configuration Debug \
+            SYMROOT="$PWD/build" \
+            CODE_SIGNING_ALLOWED=NO \
+            build
+
+      - name: Comprimir FerreteraCD.app
+        run: |
+          cd build/Debug-iphonesimulator
+          zip -r "$GITHUB_WORKSPACE/FerreteraCD.zip" FerreteraCD.app
+
+      - name: Guardar zip para Appetize
+        uses: actions/upload-artifact@v4
+        with:
+          name: FerreteraCD-para-Appetize
+          path: FerreteraCD.zip
